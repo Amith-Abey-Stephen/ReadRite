@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 // import OpenAI from 'openai';
 import fetch from 'node-fetch';
+const path = require('path');
 
 dotenv.config();
 
@@ -16,6 +17,9 @@ app.use(cors({
     : ['http://localhost:5173', 'http://localhost:3000']
 }));
 app.use(express.json());
+
+// Serve static files from the frontend build
+app.use(express.static(path.join(__dirname, '../dist')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -277,6 +281,11 @@ function generateFallbackResponse(answers, res) {
     books
   });
 }
+
+// Fallback to index.html for SPA routes (after API routes)
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist', 'index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
